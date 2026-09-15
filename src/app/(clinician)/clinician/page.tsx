@@ -7,4 +7,78 @@ import type { Account } from "@/types/api";
 import { PageHeading } from "@/components/page-heading";
 import { Failure, Loading } from "@/components/live-states";
 
-export default function Page() { const client = useQueryClient(); const account = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Account>("/me") }); const [authority, setAuthority] = useState(""); const [credential, setCredential] = useState(""); const submit = useMutation({ mutationFn: () => apiRequest("/providers/me/verification", { method: "POST", body: JSON.stringify({ authority, credentialReference: credential }) }), onSuccess: async () => client.invalidateQueries({ queryKey: ["me"] }) }); if (account.isPending) return <Loading />; if (account.error) return <Failure error={account.error} />; function handle(event: FormEvent) { event.preventDefault(); submit.mutate(); } return <><PageHeading eyebrow="PROVIDER ONBOARDING" title="Clinical access starts with verification." description="A credential reference is hashed before persistence. Verification is completed by the configured authority; it cannot be self-approved." /><section className="panel settings-panel"><h2>{account.data.provider?.displayName}</h2><p>{account.data.provider?.providerType}</p><div className="security-line"><span>Verification</span><span className={`status-pill ${account.data.provider?.verificationStatus === "VERIFIED" ? "" : "pending"}`}>{account.data.provider?.verificationStatus}</span></div>{account.data.provider?.verificationStatus !== "VERIFIED" && <form onSubmit={handle}><label className="form-field">Verification authority<input value={authority} onChange={(event) => setAuthority(event.target.value)} required maxLength={160} /></label><label className="form-field">Credential reference<input value={credential} onChange={(event) => setCredential(event.target.value)} required maxLength={200} /></label><button className="button" disabled={submit.isPending}>Submit for verification</button></form>}{submit.isSuccess && <p className="success-message">Verification submitted.</p>}{submit.error && <p className="error-message" role="alert">{submit.error.message}</p>}<Link className="text-button" href="/clinician/settings">Configure required passkey MFA →</Link></section></>; }
+export default function Page() {
+  const client = useQueryClient();
+  const account = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Account>("/me") });
+  const [authority, setAuthority] = useState("");
+  const [credential, setCredential] = useState("");
+  const submit = useMutation({
+    mutationFn: () =>
+      apiRequest("/providers/me/verification", {
+        method: "POST",
+        body: JSON.stringify({ authority, credentialReference: credential }),
+      }),
+    onSuccess: async () => client.invalidateQueries({ queryKey: ["me"] }),
+  });
+  if (account.isPending) return <Loading />;
+  if (account.error) return <Failure error={account.error} />;
+  function handle(event: FormEvent) {
+    event.preventDefault();
+    submit.mutate();
+  }
+  return (
+    <>
+      <PageHeading
+        eyebrow="PROVIDER ONBOARDING"
+        title="Clinical access starts with verification."
+        description="A credential reference is hashed before persistence. Verification is completed by the configured authority; it cannot be self-approved."
+      />
+      <section className="panel settings-panel">
+        <h2>{account.data.provider?.displayName}</h2>
+        <p>{account.data.provider?.providerType}</p>
+        <div className="security-line">
+          <span>Verification</span>
+          <span
+            className={`status-pill ${account.data.provider?.verificationStatus === "VERIFIED" ? "" : "pending"}`}
+          >
+            {account.data.provider?.verificationStatus}
+          </span>
+        </div>
+        {account.data.provider?.verificationStatus !== "VERIFIED" && (
+          <form onSubmit={handle}>
+            <label className="form-field">
+              Verification authority
+              <input
+                value={authority}
+                onChange={(event) => setAuthority(event.target.value)}
+                required
+                maxLength={160}
+              />
+            </label>
+            <label className="form-field">
+              Credential reference
+              <input
+                value={credential}
+                onChange={(event) => setCredential(event.target.value)}
+                required
+                maxLength={200}
+              />
+            </label>
+            <button className="button" disabled={submit.isPending}>
+              Submit for verification
+            </button>
+          </form>
+        )}
+        {submit.isSuccess && <p className="success-message">Verification submitted.</p>}
+        {submit.error && (
+          <p className="error-message" role="alert">
+            {submit.error.message}
+          </p>
+        )}
+        <Link className="text-button" href="/clinician/settings">
+          Configure required passkey MFA →
+        </Link>
+      </section>
+    </>
+  );
+}

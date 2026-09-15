@@ -1,0 +1,14 @@
+.next/
+node_modules/
+playwright-report/
+test-results/
+pnpm-lock.yaml
+docs/
+scripts/
+.github/
+next.config.ts
+next-env.d.ts
+postcss.config.mjs
+eslint.config.mjs
+playwright.config.ts
+*.md

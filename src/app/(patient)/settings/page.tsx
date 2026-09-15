@@ -6,4 +6,66 @@ import type { Account } from "@/types/api";
 import { PageHeading } from "@/components/page-heading";
 import { Failure, Loading } from "@/components/live-states";
 
-export default function Page() { const client = useQueryClient(); const account = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Account>("/me") }); const [name, setName] = useState(""); const update = useMutation({ mutationFn: () => apiRequest("/patients/me", { method: "PATCH", body: JSON.stringify({ displayName: name || account.data?.patient?.displayName, emergencyModeEnabled: false }) }), onSuccess: async () => client.invalidateQueries({ queryKey: ["me"] }) }); if (account.isPending) return <Loading />; if (account.error) return <Failure error={account.error} />; function submit(event: FormEvent) { event.preventDefault(); update.mutate(); } return <><PageHeading eyebrow="WALLET-LINKED PROFILE" title="Account settings." description="Freighter is your only login identity. Your clinical data remains off-chain." /><section className="panel settings-panel"><h2>Patient profile</h2><form onSubmit={submit}><label className="form-field">Display name<input value={name} placeholder={account.data.patient?.displayName} onChange={(event) => setName(event.target.value)} maxLength={100} /></label><button className="button" disabled={update.isPending}>Save profile</button></form>{update.isSuccess && <p className="success-message" role="status">Profile saved.</p>}{update.error && <p className="error-message" role="alert">{update.error.message}</p>}<div className="security-line"><span>Wallet</span><code>{account.data.wallet}</code><span className="status-pill">Verified session</span></div></section></>; }
+export default function Page() {
+  const client = useQueryClient();
+  const account = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Account>("/me") });
+  const [name, setName] = useState("");
+  const update = useMutation({
+    mutationFn: () =>
+      apiRequest("/patients/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          displayName: name || account.data?.patient?.displayName,
+          emergencyModeEnabled: false,
+        }),
+      }),
+    onSuccess: async () => client.invalidateQueries({ queryKey: ["me"] }),
+  });
+  if (account.isPending) return <Loading />;
+  if (account.error) return <Failure error={account.error} />;
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    update.mutate();
+  }
+  return (
+    <>
+      <PageHeading
+        eyebrow="WALLET-LINKED PROFILE"
+        title="Account settings."
+        description="Freighter is your only login identity. Your clinical data remains off-chain."
+      />
+      <section className="panel settings-panel">
+        <h2>Patient profile</h2>
+        <form onSubmit={submit}>
+          <label className="form-field">
+            Display name
+            <input
+              value={name}
+              placeholder={account.data.patient?.displayName}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={100}
+            />
+          </label>
+          <button className="button" disabled={update.isPending}>
+            Save profile
+          </button>
+        </form>
+        {update.isSuccess && (
+          <p className="success-message" role="status">
+            Profile saved.
+          </p>
+        )}
+        {update.error && (
+          <p className="error-message" role="alert">
+            {update.error.message}
+          </p>
+        )}
+        <div className="security-line">
+          <span>Wallet</span>
+          <code>{account.data.wallet}</code>
+          <span className="status-pill">Verified session</span>
+        </div>
+      </section>
+    </>
+  );
+}

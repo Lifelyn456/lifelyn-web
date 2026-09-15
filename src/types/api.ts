@@ -1,3 +1,3 @@
-export type Account = { id: string; wallet: string; role: "PATIENT" | "CLINICIAN"; status: string; mfaState: string; patient?: { id: string; displayName: string } | null; provider?: { id: string; displayName: string; providerType: string; verificationStatus: string } | null };
-export type RecordSummary = { id: string; recordType: string; sourceType: string; originalFilename: string; mimeType: string; status: string; createdAt: string; versions: Array<{ id: string; sha256: string; sizeBytes: number }> };
-export type TimelineEvent = { id: string; eventType: string; occurredAt: string; certainty: string; sourceKind: string; selfReported: boolean; interpretation: { display?: string }; correction?: unknown; reviewStatus: string; citations: Array<{ recordVersionId: string; recordId: string; page?: number }> };
+// Re-exported from the single source of truth for the lifelyn-api contract.
+// Prefer importing directly from "@/lib/api/generated/types" in new code.
+export type { Account, RecordSummary, TimelineEvent } from "@/lib/api/generated/types";

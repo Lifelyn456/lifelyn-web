@@ -558,11 +558,7 @@ img {
 }
 .document-lines {
   height: 70px;
-  background: repeating-linear-gradient(
-    to bottom,
-    #e6ede3 0 5px,
-    transparent 5px 16px
-  );
+  background: repeating-linear-gradient(to bottom, #e6ede3 0 5px, transparent 5px 16px);
   margin-top: 25px;
 }
 .document-footer {

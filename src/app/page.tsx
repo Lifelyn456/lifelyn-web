@@ -83,39 +83,34 @@ export default function Home() {
             scrub: 1.5,
           },
         });
-        gsap.utils
-          .toArray<HTMLElement>(".reveal")
-          .forEach((el) =>
-            gsap.from(el, {
-              y: 45,
-              opacity: 0,
-              duration: 0.9,
-              scrollTrigger: { trigger: el, start: "top 88%" },
-            }),
-          );
+        gsap.utils.toArray<HTMLElement>(".reveal").forEach((el) =>
+          gsap.from(el, {
+            y: 45,
+            opacity: 0,
+            duration: 0.9,
+            scrollTrigger: { trigger: el, start: "top 88%" },
+          }),
+        );
       }, root);
       return () => ctx.revert();
     });
-    mm.add(
-      "(min-width: 900px) and (prefers-reduced-motion: no-preference)",
-      () => {
-        const ctx = gsap.context(() => {
-          gsap.to(".story-track", {
-            xPercent: -66.6667,
-            ease: "none",
-            scrollTrigger: {
-              trigger: ".story",
-              start: "top top",
-              end: "+=2200",
-              pin: true,
-              scrub: 1,
-              anticipatePin: 1,
-            },
-          });
-        }, root);
-        return () => ctx.revert();
-      },
-    );
+    mm.add("(min-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
+      const ctx = gsap.context(() => {
+        gsap.to(".story-track", {
+          xPercent: -66.6667,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".story",
+            start: "top top",
+            end: "+=2200",
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+          },
+        });
+      }, root);
+      return () => ctx.revert();
+    });
     return () => mm.revert();
   }, []);
   return (
@@ -164,8 +159,7 @@ export default function Home() {
             </h1>
             <p className="hero-reveal hero-description">
               Every record. Every chapter. One continuous story.
-              <br className="desktop" /> A health memory that stays with you,
-              wherever life goes.
+              <br className="desktop" /> A health memory that stays with you, wherever life goes.
             </p>
             <div className="hero-reveal hero-buttons">
               <Link className="button" href="/register">
@@ -185,10 +179,7 @@ export default function Home() {
               <span>Always yours.</span>
             </div>
           </div>
-          <div
-            className="memory-stage"
-            aria-label="Lifelyn product capability overview"
-          >
+          <div className="memory-stage" aria-label="Lifelyn product capability overview">
             <div className="orbit orbit-one" />
             <div className="orbit orbit-two" />
             <div className="stage-label">YOUR LIFE, CONNECTED</div>
@@ -240,9 +231,7 @@ export default function Home() {
           </div>
         </section>
         <section className="manifesto reveal">
-          <span className="eyebrow">
-            A LITTLE LESS FRAGMENTED. A LOT MORE YOU.
-          </span>
+          <span className="eyebrow">A LITTLE LESS FRAGMENTED. A LOT MORE YOU.</span>
           <h2>
             Your life doesn’t happen
             <br />
@@ -257,17 +246,14 @@ export default function Home() {
           <div className="manifesto-bottom">
             <span className="section-number">01 / THE BIG PICTURE</span>
             <p>
-              A lab result here. A prescription there. Years of history in
-              different places. Lifelyn brings it all together, so your next
-              chapter starts with the whole story.
+              A lab result here. A prescription there. Years of history in different places. Lifelyn
+              brings it all together, so your next chapter starts with the whole story.
             </p>
           </div>
         </section>
         <section className="story" id="how-it-works">
           <div className="story-heading">
-            <span className="eyebrow">
-              FROM SCATTERED RECORDS TO A CONNECTED YOU
-            </span>
+            <span className="eyebrow">FROM SCATTERED RECORDS TO A CONNECTED YOU</span>
             <span>
               THREE SIMPLE STEPS <ArrowRight size={15} />
             </span>
@@ -282,8 +268,8 @@ export default function Home() {
                   story together.
                 </h2>
                 <p>
-                  Upload your records. From a recent lab report to an old
-                  prescription, give every piece of your history a home.
+                  Upload your records. From a recent lab report to an old prescription, give every
+                  piece of your history a home.
                 </p>
                 <Link href="/register" className="text-button">
                   Create your record library <ArrowUpRight size={19} />
@@ -321,8 +307,8 @@ export default function Home() {
                   See the story.
                 </h2>
                 <p>
-                  Turn separate records into a clear timeline. Ask about your
-                  history and follow every answer back to its source.
+                  Turn separate records into a clear timeline. Ask about your history and follow
+                  every answer back to its source.
                 </p>
                 <Link href="/register" className="text-button">
                   Build your timeline <ArrowUpRight size={19} />
@@ -353,8 +339,8 @@ export default function Home() {
                   Keep the control.
                 </h2>
                 <p>
-                  Let the right clinician see the right records, for the right
-                  amount of time. Change your mind? Revoke access.
+                  Let the right clinician see the right records, for the right amount of time.
+                  Change your mind? Revoke access.
                 </p>
                 <Link href="/register" className="text-button">
                   Set up access controls <ArrowUpRight size={19} />
@@ -388,8 +374,8 @@ export default function Home() {
               <span>It’s the foundation.</span>
             </h2>
             <p>
-              Your most personal information deserves more than a password. It
-              deserves to stay in your hands.
+              Your most personal information deserves more than a password. It deserves to stay in
+              your hands.
             </p>
           </div>
           <div className="trust-grid">
@@ -398,8 +384,8 @@ export default function Home() {
               <span>01</span>
               <h3>Private at the core.</h3>
               <p>
-                Original records are designed to remain encrypted off-chain.
-                Your health story never belongs on a public ledger.
+                Original records are designed to remain encrypted off-chain. Your health story never
+                belongs on a public ledger.
               </p>
             </article>
             <article className="reveal">
@@ -407,8 +393,8 @@ export default function Home() {
               <span>02</span>
               <h3>Permission, not assumption.</h3>
               <p>
-                Scoped, time-limited access puts you in charge of who sees what.
-                Revoke permission when you need to.
+                Scoped, time-limited access puts you in charge of who sees what. Revoke permission
+                when you need to.
               </p>
             </article>
             <article className="reveal">
@@ -416,8 +402,8 @@ export default function Home() {
               <span>03</span>
               <h3>Evidence behind every answer.</h3>
               <p>
-                Follow historical claims back to their source records. Know what
-                is recorded, what conflicts, and what is missing.
+                Follow historical claims back to their source records. Know what is recorded, what
+                conflicts, and what is missing.
               </p>
             </article>
           </div>
@@ -431,9 +417,8 @@ export default function Home() {
               <span>More understanding.</span>
             </h2>
             <p>
-              Help your clinician start with context. A longitudinal timeline,
-              source-linked answers, and a patient’s permission — all in one
-              place.
+              Help your clinician start with context. A longitudinal timeline, source-linked
+              answers, and a patient’s permission — all in one place.
             </p>
             <Link href="/register" className="button">
               Register as a clinician <ArrowUpRight size={18} />
@@ -445,13 +430,10 @@ export default function Home() {
               <span>ASK PATIENT HISTORY</span>
               <span className="product-tag">EVIDENCE-LINKED</span>
             </div>
-            <div className="question-bubble">
-              Ask from your authenticated workspace
-            </div>
+            <div className="question-bubble">Ask from your authenticated workspace</div>
             <p>
-              This public page does not generate sample medical answers. Signed-in
-              answers are produced only from records the current session is
-              authorized to access.
+              This public page does not generate sample medical answers. Signed-in answers are
+              produced only from records the current session is authorized to access.
             </p>
             <div className="source-preview">
               <FileText size={21} />
@@ -482,10 +464,7 @@ export default function Home() {
                   onClick={() => setFaq(faq === i ? null : i)}
                 >
                   {q}
-                  <ChevronDown
-                    className={faq === i ? "rotated" : ""}
-                    size={20}
-                  />
+                  <ChevronDown className={faq === i ? "rotated" : ""} size={20} />
                 </button>
                 <div id={`faq-${i}`} hidden={faq !== i}>
                   <p>{a}</p>

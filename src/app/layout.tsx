@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   description:
     "One continuous health memory. Bring your records together, understand your history, and control who can see it.",
 };
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body><AppProviders>{children}</AppProviders></body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }
