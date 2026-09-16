@@ -66,7 +66,7 @@ export function validateChallenge(raw: unknown, address: string, origin: string,
     c.origin !== origin ||
     c.message !== challengeMessage(c) ||
     Date.parse(c.expiresAt) <= now ||
-    Date.parse(c.issuedAt) > now + 30000 ||
+    Date.parse(c.issuedAt) > now + 300000 ||
     Date.parse(c.expiresAt) - Date.parse(c.issuedAt) > 300000
   )
     throw new Error("The sign-in challenge could not be verified. Please try again.");
