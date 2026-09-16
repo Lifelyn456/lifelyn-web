@@ -12,6 +12,8 @@
   <img src="https://img.shields.io/badge/license-unlicensed-lightgrey" alt="Unlicensed" />
 </p>
 
+<p align="center">📖 <a href="https://cjay-1.gitbook.io/lifelyn-docs/">Documentation</a></p>
+
 Lifelyn is a patient-owned health memory: a continuous, evidence-cited timeline of your medical history that only you control. There's no email/password account and no client-side role switch — the only way in is signing a challenge with your own Stellar wallet, and every protected screen re-checks authorization against the live API rather than trusting anything the browser claims. This repository is the Next.js 16 client patients and clinicians actually use.
 
 This repo is one of two halves of the product: it talks to [`lifelyn-api`](https://github.com/Lifelyn456/Lifelyn-api) for everything — there is no mock backend, and no demo/fixture-backed screen. If the API or one of its dependencies is down, the UI fails closed and says so.
