@@ -39,7 +39,10 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
-    signal: AbortSignal.timeout(15000),
+    // Free-tier hosting can take 50s+ to wake a sleeping instance on the first
+    // request after a period of inactivity; a short timeout here would abort
+    // that request before the service ever gets a chance to respond.
+    signal: AbortSignal.timeout(60000),
   });
   const body = await response.json().catch(() => null);
   if (!response.ok)

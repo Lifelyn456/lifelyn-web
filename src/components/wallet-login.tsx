@@ -34,7 +34,7 @@ export function WalletLogin({ register = false }: { register?: boolean }) {
       setStatus("Approve the connection in Freighter.");
       const access = await requestAccess();
       if (access.error || !access.address) throw new Error("Wallet connection was not approved.");
-      setStatus("Requesting a single-use sign-in challenge…");
+      setStatus("Requesting a single-use sign-in challenge… (the service may take up to a minute to wake up if it's been idle)");
       const challenge = validateChallenge(
         await apiRequest<unknown>("/auth/challenge", {
           method: "POST",
@@ -83,7 +83,7 @@ export function WalletLogin({ register = false }: { register?: boolean }) {
       setStatus("");
       setError(
         cause instanceof TypeError
-          ? "The Lifelyn API is not reachable. Start the live services and try again."
+          ? "Could not reach the Lifelyn API. If this is the first request in a while, the free-tier service may still be waking up — wait about a minute and try again."
           : cause instanceof Error
             ? cause.message
             : "Freighter sign-in failed.",
