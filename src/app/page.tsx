@@ -128,6 +128,9 @@ export default function Home() {
           <a href="#for-clinicians" onClick={() => setMenu(false)}>
             For clinicians
           </a>
+          <a href="https://cjay-1.gitbook.io/lifelyn-docs/" target="_blank" rel="noreferrer">
+            Docs
+          </a>
         </nav>
         <div className="header-actions">
           <Link href="/login" className="login-link">
@@ -493,6 +496,9 @@ export default function Home() {
           <span>Your health, remembered.</span>
           <a href="#your-control">
             Privacy & ownership <ArrowUpRight size={15} />
+          </a>
+          <a href="https://cjay-1.gitbook.io/lifelyn-docs/" target="_blank" rel="noreferrer">
+            Documentation <ArrowUpRight size={15} />
           </a>
         </div>
         <div className="footer-bottom">
