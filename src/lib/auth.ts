@@ -29,25 +29,50 @@ export async function apiBlob(path: string): Promise<Blob> {
   }
   return response.blob();
 }
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${apiBase}${path}`, {
-    ...options,
-    cache: "no-store",
-    credentials: "omit",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-    // Free-tier hosting can take 50s+ to wake a sleeping instance on the first
-    // request after a period of inactivity; a short timeout here would abort
-    // that request before the service ever gets a chance to respond.
-    signal: AbortSignal.timeout(60000),
-  });
-  const body = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(body?.error?.message ?? "The service is unavailable. Please try again.");
-  return body as T;
+  const attempts = 3;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(`${apiBase}${path}`, {
+        ...options,
+        cache: "no-store",
+        credentials: "omit",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...options.headers,
+        },
+        // Free-tier hosting can take 50s+ to wake a sleeping instance on the
+        // first request after a period of inactivity; a short timeout here
+        // would abort that request before the service ever gets a chance to
+        // respond.
+        signal: AbortSignal.timeout(60000),
+      });
+    } catch (cause) {
+      // A genuine connection-level failure (DNS, refused, no CORS header on
+      // the response) throws a TypeError before any HTTP response exists.
+      // Free-tier hosting can briefly refuse connections during its own
+      // redeploys even while otherwise healthy, so one or two retries clear
+      // most of these without ever surfacing an error to the user. A timeout
+      // (AbortError) is not retried here: the server may already be
+      // processing that request, and retrying a non-idempotent call like
+      // /auth/verify could waste the single-use challenge it's holding.
+      if (cause instanceof TypeError && attempt < attempts) {
+        await sleep(attempt * 1000);
+        continue;
+      }
+      throw cause;
+    }
+    const body = await response.json().catch(() => null);
+    if (!response.ok)
+      throw new Error(body?.error?.message ?? "The service is unavailable. Please try again.");
+    return body as T;
+  }
+  throw new Error("The Lifelyn API is not reachable.");
 }
 export const challengeSchema = z.object({
   id: z.string().uuid(),
