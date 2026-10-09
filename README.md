@@ -9,7 +9,7 @@
   <a href="https://github.com/Lifelyn456/lifelyn-web/actions/workflows/ci.yml"><img src="https://github.com/Lifelyn456/lifelyn-web/actions/workflows/ci.yml/badge.svg" alt="Web checks" /></a>
   <img src="https://img.shields.io/badge/stack-Next.js%2016-black" alt="Next.js 16" />
   <img src="https://img.shields.io/badge/auth-Freighter%20only-7C3AED" alt="Freighter-only auth" />
-  <img src="https://img.shields.io/badge/license-unlicensed-lightgrey" alt="Unlicensed" />
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Lifelyn456/lifelyn-web?color=blue" alt="License: MIT" /></a>
 </p>
 
 <p align="center">📖 <a href="https://cjay-1.gitbook.io/lifelyn-docs/">Documentation</a></p>
