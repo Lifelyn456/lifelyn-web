@@ -36,6 +36,8 @@ This repo is one of two halves of the product: it talks to [`lifelyn-api`](https
 
 ## Architecture
 
+See the [source-checked route map and Freighter sign-in sequence](docs/ARCHITECTURE.md).
+
 ```
 Freighter (browser wallet)
         │  sign challenge
