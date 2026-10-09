@@ -1,81 +1,94 @@
 # Web architecture
 
-Lifelyn Web is the Next.js client of [lifelyn-api](https://github.com/Lifelyn456/Lifelyn-api).
-It uses the live API rather than a fixture-backed product backend. This document
-describes the client implementation; server-side consent enforcement is the API's
-responsibility.
+Lifelyn Web is a Next.js app. It has **no login form and no password**. A user signs in by proving they control a Stellar wallet through the Freighter browser extension. Every protected screen calls the live `Lifelyn-api` and fails closed: if the API or a dependency behind it is unavailable, the screen shows an explicit error and never a placeholder.
 
 ## Route map
 
-Next.js route groups such as `(patient)` and `(clinician)` do not appear in URLs.
-The following routes are defined by `src/app/**/page.tsx`.
-
-| Area | Routes | Who can view the screen |
+| Route | Who | What it shows |
 | --- | --- | --- |
-| Public | `/`, `/login`, `/register` | Anyone; login and registration use Freighter |
-| Patient overview | `/dashboard` | API-confirmed `PATIENT` account |
-| Patient records | `/records`, `/records/upload`, `/records/[recordId]` | API-confirmed `PATIENT` account |
-| Patient history | `/timeline`, `/ask` | API-confirmed `PATIENT` account |
-| Patient management | `/access`, `/audit`, `/settings` | API-confirmed `PATIENT` account |
-| Clinician onboarding/security | `/clinician`, `/clinician/settings` | API-confirmed `CLINICIAN` account |
-| Clinician patients | `/clinician/patients`, `/clinician/patients/[patientId]` | API-confirmed `CLINICIAN` account; available patient data depends on API authorization |
-| Clinician patient history | `/clinician/patients/[patientId]/timeline`, `/clinician/patients/[patientId]/ask` | API-confirmed `CLINICIAN` account; patient-scoped requests must be authorized by the API |
-| Clinician source record | `/clinician/patients/[patientId]/records/[recordId]` | API-confirmed `CLINICIAN` account; source access must be authorized by the API |
+| `/` | anyone | Landing page |
+| `/login` | anyone | Sign in with Freighter |
+| `/register` | anyone | Sign in with Freighter and create an account (patient or clinician) |
+| `/dashboard` | patient | Overview |
+| `/records`, `/records/upload`, `/records/[recordId]` | patient | List, upload and view the original of a medical record |
+| `/timeline` | patient | The evidence-cited health timeline |
+| `/ask` | patient | Ask questions about their own history |
+| `/access` | patient | Access requests and consent grants, including revocation |
+| `/audit` | patient | Who accessed what, and when |
+| `/settings` | patient | Account settings |
+| `/clinician/patients` | clinician | Patients who granted this clinician access |
+| `/clinician/patients/[patientId]` and `/timeline`, `/ask`, `/records/[recordId]` | clinician | A patient's data, only within the consent that patient granted |
+| `/clinician/settings` | clinician | Account and passkey (MFA) settings |
 
-Both protected route-group layouts render `AppShell` with a required role
-(`src/app/(patient)/layout.tsx` and `src/app/(clinician)/layout.tsx`).
-`src/components/app-shell.tsx` queries `/me` only when a session token exists.
-Until an account with the required role is returned, it renders a verification
-message, not the protected children. Missing tokens or account-query errors
-redirect to `/login`; a wrong role redirects to that role's home route using
-`src/lib/permissions/index.ts`. These browser checks do not replace API authorization.
+The patient and clinician areas are route groups with their own layout. Each layout wraps its pages in `AppShell`, which enforces the role (`src/components/app-shell.tsx`).
 
-## Freighter sign-in sequence
+### Route guards
 
-The sequence is implemented in `src/components/wallet-login.tsx`; challenge
-validation and request/session primitives are in `src/lib/auth.ts`.
+`AppShell` loads the account (`GET /me`) and then:
 
-1. Check that Freighter is connected, then call `requestAccess()` for the selected
-   wallet address. Missing extension, denied access or a missing address stops login.
-2. POST `/auth/challenge` with that address. `validateChallenge()` parses the
-   response and checks the address, current browser origin, exact canonical message,
-   expiry, issue time and maximum five-minute challenge lifetime. It rejects an
-   issue time more than five minutes in the future.
-3. Call Freighter `signMessage()` with the validated message and address. Require
-   a signed message, no wallet error and the same returned signer address.
-   This message proves wallet ownership; it is not a payment transaction.
-4. POST `/auth/verify` with the challenge ID, address and signature. Store the
-   returned token using `setSessionToken()` only after verification succeeds.
-5. For login, GET `/me` to load the account. For registration, PATCH `/me` with
-   the selected account type, display name and clinician provider type when
-   applicable. The registration choice is not a protected-screen role override.
-6. Redirect patients to `/dashboard`. Redirect clinicians to `/clinician/patients`
-   if MFA is enrolled, or `/clinician/settings` otherwise. Subsequent protected
-   rendering still checks the live account through `AppShell`.
+| Situation | Result |
+| --- | --- |
+| No session token, or the account request fails | Redirect to `/login` |
+| Signed in, but the role does not match the area | Redirect to that role's home (`/dashboard` for a patient, `/clinician/patients` for a clinician) |
+| Role matches | The page renders |
 
-The token is a module-level in-memory value, not a cookie or local-storage entry.
-Refreshing the page loses it. Requests attach a Bearer header when the token exists,
-use `credentials: "omit"` and disable fetch caching. Sign-out clears the token
-and the query cache before redirecting to login (`app-shell.tsx`).
+The guard is a convenience for the user. **The API is the authorization boundary:** it checks the session and the patient's consent on every request, so bypassing the client guard gains nothing.
 
-## API unavailable behavior
+## Sign-in flow (Freighter)
 
-- `apiRequest()` allows three total attempts for connection-level `TypeError`
-  failures, waiting one then two seconds before retries. Each fetch has a
-  60-second timeout. Timeout and HTTP-error responses are not retried by this
-  primitive; HTTP errors use the API's error message or an unavailable-service
-  fallback. This policy also applies to POST requests; it is not a guarantee that
-  a request was never processed by the server.
-- `apiBlob()` uses a 30-second timeout and does not contain a retry loop.
-- A sign-in error clears the session token and status, shows an error alert, and
-  re-enables the sign-in button. Connection errors explain that the free-tier API
-  may need time to wake; no fake account is created.
-- `AppShell` disables query retries for `/me` and redirects on query failure,
-  without rendering protected children. Data screens use loading/error states;
-  `src/components/live-states.tsx` renders "Live service unavailable" for failures.
-  There is no fixture fallback in these request primitives.
+Implemented in `src/components/wallet-login.tsx` and `src/lib/auth.ts`.
 
-Typed resource calls are collected in `src/lib/api/client.ts`, with response
-types in `src/lib/api/generated/types.ts`. Browser request handling and visible
-route gates are not proof of a successful live cross-service login or of
-server-side consent correctness; those need the API integration environment.
+1. The app checks that Freighter is installed and unlocked. If not, it says so.
+2. `requestAccess()` asks the user to approve the connection and returns the wallet address.
+3. `POST /auth/challenge` with the address returns a single-use challenge.
+4. **The app verifies the challenge itself** (`validateChallenge`) before asking for a signature. It rebuilds the exact message from the challenge fields and requires that the address and origin match the page, that the challenge has not expired, that it was not issued in the future (allowing 5 minutes of clock skew), and that its lifetime is at most 5 minutes. Anything else is refused.
+5. `signMessage()` asks the user to sign the message in Freighter. The message states that it proves wallet ownership only and does not authorize a payment or grant access to records.
+6. The app checks that the signer address is the connected address.
+7. `POST /auth/verify` with the challenge id, address and signature returns a session token.
+8. The token is stored by `setSessionToken`.
+9. On `/register`, `PATCH /me` creates the account with the chosen role and name (a clinician also gives a provider type). On `/login`, `GET /me` loads it.
+10. The user is sent to `/dashboard` (patient), `/clinician/patients` (clinician with passkey MFA enrolled) or `/clinician/settings` (clinician who still needs to enrol).
+
+If any step fails the token is cleared and a plain message is shown.
+
+### Where the session lives
+
+The token is held in a module variable in memory (`src/lib/auth.ts`). It is not written to `localStorage`, `sessionStorage`, cookies or IndexedDB, and API requests are sent with `credentials: "omit"`. Reloading the page ends the session. That is deliberate.
+
+## When the API is unavailable
+
+- A network failure (a `TypeError` from `fetch`) is retried up to 3 times with a growing delay. A timeout is **not** retried, because the server may already be processing it and `/auth/verify` consumes a single-use challenge.
+- The login screen explains that a free-tier service can take about a minute to wake up.
+- List and detail screens show a "Live service unavailable" panel with the API's own error message.
+- The upload screen checks the file type and size (PDF, PNG or JPEG, 1 byte to 25 MB, the same limits as the API) before any request, and shows an explicit error if a step fails.
+
+## Security headers
+
+`next.config.ts` sets these on every response, and `tests/e2e/security-headers.spec.ts` asserts them:
+
+| Header | Value |
+| --- | --- |
+| `Content-Security-Policy` | `default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `connect-src` limited to the app and the API origin |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `same-origin` |
+| `Strict-Transport-Security` | two years, with `includeSubDomains` and `preload` |
+| `Permissions-Policy` | camera, microphone and geolocation off |
+
+`script-src` and `style-src` still allow `'unsafe-inline'`, which Next.js needs for its inline bootstrap scripts without a nonce. Moving to nonces is a known improvement.
+
+## Accessibility
+
+`tests/e2e/accessibility.spec.ts` runs axe-core (WCAG 2.1 A and AA) on every route reachable without a session, and checks that the first Tab stop is a real control. Protected routes redirect to `/login` without a live API, so they are not audited yet.
+
+## Code layout
+
+| Path | Contents |
+| --- | --- |
+| `src/app` | Routes, in `(patient)` and `(clinician)` groups |
+| `src/components` | UI by area: `records`, `timeline`, `consent`, `chat`, `audit`, `clinician`, `ui` |
+| `src/lib/auth.ts` | Session token, `apiRequest`, `apiBlob`, challenge validation |
+| `src/lib/api` | Typed API client and generated types |
+| `src/lib/permissions` | Role checks and each role's home route |
+| `src/lib/upload-validation.ts` | Client-side upload limits that mirror the API |
+| `tests` | Vitest component tests and Playwright end-to-end tests |
