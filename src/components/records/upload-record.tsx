@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import { api } from "@/lib/api/client";
+import { validateRecordFile } from "@/lib/upload-validation";
 
 export type UploadStage = "idle" | "creating-slot" | "uploading" | "finalizing" | "done" | "error";
 
@@ -13,6 +14,8 @@ export function UploadRecord() {
   const [recordType, setRecordType] = useState("OTHER");
   const [stage, setStage] = useState<UploadStage>("idle");
   const [error, setError] = useState("");
+  // Changing the key remounts the file input, so a finished upload does not leave its name showing.
+  const [inputKey, setInputKey] = useState(0);
   const statusByStage: Record<UploadStage, string> = {
     idle: "",
     "creating-slot": "Creating a private upload slot…",
@@ -22,8 +25,20 @@ export function UploadRecord() {
     error: "",
   };
   const busy = stage !== "idle" && stage !== "done" && stage !== "error";
+  function choose(selected: File | null) {
+    const problem = selected ? validateRecordFile(selected) : null;
+    setFile(problem ? null : selected);
+    setError(problem ?? "");
+    setStage("idle");
+  }
   async function upload() {
     if (!file) return;
+    // Re-checked here as well: the button state is not the only path to this function.
+    const problem = validateRecordFile(file);
+    if (problem) {
+      setError(problem);
+      return;
+    }
     setError("");
     try {
       setStage("creating-slot");
@@ -46,6 +61,7 @@ export function UploadRecord() {
       await client.invalidateQueries({ queryKey: ["records", "me"] });
       setStage("done");
       setFile(null);
+      setInputKey((key) => key + 1);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Upload failed.");
       setStage("error");
@@ -75,9 +91,10 @@ export function UploadRecord() {
         <label className="form-field">
           Medical PDF or image
           <input
+            key={inputKey}
             type="file"
             accept="application/pdf,image/png,image/jpeg"
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+            onChange={(event) => choose(event.target.files?.[0] ?? null)}
           />
         </label>
         {error && (
