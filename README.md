@@ -79,6 +79,10 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm build
 
 The Playwright suite verifies public routing and fail-closed protected routing; the full cross-service journey requires the live API integration environment.
 
+## Architecture and accessibility
+
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) has the route map, the route guards, the Freighter sign-in flow, where the session lives and the security headers. Accessibility is tested with axe-core (WCAG 2.1 A and AA) on every public route as part of `pnpm test:e2e`.
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). Found a security issue? See [`SECURITY.md`](SECURITY.md) instead of opening a public issue.
