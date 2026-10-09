@@ -4,7 +4,7 @@
   --teal: #006b61;
   --mint: #b9efcf;
   --paper: #fcfdf9;
-  --muted: #6b7c76;
+  --muted: #5a6b65;
   --line: #dce5dc;
   --white: #fff;
   --font-sans: Arial, Helvetica, sans-serif;
@@ -436,7 +436,7 @@ img {
   margin-top: 40px;
 }
 .manifesto h2 span {
-  color: #839280;
+  color: #647a62;
 }
 .manifesto-bottom {
   display: flex;
@@ -488,7 +488,7 @@ img {
 }
 .step-number {
   font: italic 60px Georgia;
-  color: #94afa0;
+  color: #6f947f;
 }
 .story-content h2 {
   font-weight: 400;
@@ -2648,7 +2648,7 @@ footer {
   line-height: 1.8;
   max-width: 340px;
   margin-top: 25px;
-  color: #73856a;
+  color: #4f6247;
   position: relative;
   z-index: 1;
 }
@@ -2717,7 +2717,7 @@ footer {
   display: flex;
   gap: 10px;
   font-size: 11px;
-  color: #7b8f73;
+  color: #5d7055;
   line-height: 1.8;
   margin: 22px 0;
 }
